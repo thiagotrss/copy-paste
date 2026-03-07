@@ -4,13 +4,10 @@ import com.rready.copypaste.model.Clip
 import com.rready.copypaste.model.ClipType
 import com.rready.copypaste.repository.ClipRepository
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.dao.DuplicateKeyException
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
-import java.security.SecureRandom
 import java.time.Instant
-import java.util.Base64
 
 @Service
 class ClipService(
@@ -20,7 +17,7 @@ class ClipService(
 ) {
 
     fun createTextClip(uploaderEmail: String, text: String, allowedEmails: List<String>?): Clip {
-        val token = generateUniqueToken()
+        val token = nextToken()
         val clip = Clip(
             token = token,
             uploaderEmail = uploaderEmail,
@@ -33,7 +30,7 @@ class ClipService(
     }
 
     fun createFileClip(uploaderEmail: String, file: MultipartFile, allowedEmails: List<String>?): Clip {
-        val token = generateUniqueToken()
+        val token = nextToken()
         val storagePath = fileStorageService.store(token, file)
         val clip = Clip(
             token = token,
@@ -68,20 +65,12 @@ class ClipService(
         return viewerEmail.lowercase() in allowed || viewerEmail.lowercase() == clip.uploaderEmail.lowercase()
     }
 
-    private fun generateUniqueToken(): String {
-        repeat(10) {
-            val token = generateToken()
-            try {
-                // Check uniqueness by attempting to use it; DuplicateKeyException on save handles collision
-                if (clipRepository.findByToken(token) == null) return token
-            } catch (_: Exception) {}
-        }
-        throw IllegalStateException("Could not generate a unique token after 10 attempts")
-    }
-
-    private fun generateToken(): String {
-        val bytes = ByteArray(6)
-        SecureRandom().nextBytes(bytes)
-        return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes)
+    private fun nextToken(): String {
+        val activeTokens = clipRepository.findAll()
+            .mapNotNull { it.token.toIntOrNull() }
+            .toSet()
+        var candidate = 1
+        while (candidate in activeTokens) candidate++
+        return candidate.toString()
     }
 }
