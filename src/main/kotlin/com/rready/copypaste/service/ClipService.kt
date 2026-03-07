@@ -66,7 +66,7 @@ class ClipService(
     }
 
     private fun nextToken(): String {
-        val activeTokens = clipRepository.findAll()
+        val activeTokens = clipRepository.findAllTokens()
             .mapNotNull { it.token.toIntOrNull() }
             .toSet()
         var candidate = 1
