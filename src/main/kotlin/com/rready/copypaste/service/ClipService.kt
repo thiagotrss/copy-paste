@@ -55,6 +55,14 @@ class ClipService(
     fun getActiveClipsForUser(uploaderEmail: String): List<Clip> =
         clipRepository.findByUploaderEmailAndExpiresAtAfterOrderByCreatedAtDesc(uploaderEmail, Instant.now())
 
+    fun deleteClip(token: String, requesterEmail: String): Boolean {
+        val clip = clipRepository.findByToken(token) ?: return false
+        if (clip.uploaderEmail.lowercase() != requesterEmail.lowercase()) return false
+        clip.storagePath?.let { fileStorageService.delete(it) }
+        clipRepository.delete(clip)
+        return true
+    }
+
     fun deleteExpired() {
         val expired = clipRepository.findByExpiresAtBefore(Instant.now())
         expired.forEach { clip ->

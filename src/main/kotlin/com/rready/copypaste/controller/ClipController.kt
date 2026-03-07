@@ -97,6 +97,17 @@ class ClipController(
         return "clip"
     }
 
+    @PostMapping("/c/{token}/delete")
+    fun deleteClip(
+        @PathVariable token: String,
+        @AuthenticationPrincipal principal: OAuth2User,
+        redirectAttributes: RedirectAttributes
+    ): String {
+        val email = principal.getAttribute<String>("email")!!
+        clipService.deleteClip(token, email)
+        return "redirect:/"
+    }
+
     @GetMapping("/c/{token}/download")
     fun downloadFile(
         @PathVariable token: String,

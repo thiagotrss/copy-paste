@@ -52,27 +52,38 @@
                         <i class="bi bi-inbox d-block mb-2" style="font-size:1.5rem"></i>
                         <span th:text="#{index.no.clips}">No active clips yet</span>
                     </div>
-                    <a th:each="clip : ${myClips}"
-                       th:href="@{/c/{token}(token=${clip.token})}"
-                       th:classappend="${clip.type.name() == 'FILE'} ? 'file' : ''"
-                       class="list-group-item list-group-item-action clip-item px-3 py-2">
-                        <div class="d-flex align-items-center justify-content-between mb-1">
-                            <span th:if="${clip.type.name() == 'TEXT'}" class="badge bg-secondary" style="font-size:.7rem">
-                                <i class="bi bi-type me-1"></i><span th:text="#{clip.badge.text}">Text</span>
-                            </span>
-                            <span th:if="${clip.type.name() == 'FILE'}" class="badge bg-info text-dark" style="font-size:.7rem">
-                                <i class="bi bi-file-earmark me-1"></i><span th:text="#{clip.badge.file}">File</span>
-                            </span>
-                            <small class="text-muted" style="font-size:.7rem">
-                                <i class="bi bi-clock me-1"></i>
-                                <span th:text="${#temporals.format(clip.expiresAt, 'dd/MM HH:mm', #locale)}"></span>
-                            </small>
+                    <div th:each="clip : ${myClips}"
+                         th:classappend="${clip.type.name() == 'FILE'} ? 'file' : ''"
+                         class="list-group-item clip-item px-3 py-2">
+                        <div class="d-flex align-items-start gap-2">
+                            <a th:href="@{/c/{token}(token=${clip.token})}" class="flex-grow-1 text-decoration-none text-body">
+                                <div class="d-flex align-items-center justify-content-between mb-1">
+                                    <span th:if="${clip.type.name() == 'TEXT'}" class="badge bg-secondary" style="font-size:.7rem">
+                                        <i class="bi bi-type me-1"></i><span th:text="#{clip.badge.text}">Text</span>
+                                    </span>
+                                    <span th:if="${clip.type.name() == 'FILE'}" class="badge bg-info text-dark" style="font-size:.7rem">
+                                        <i class="bi bi-file-earmark me-1"></i><span th:text="#{clip.badge.file}">File</span>
+                                    </span>
+                                    <small class="text-muted" style="font-size:.7rem">
+                                        <i class="bi bi-clock me-1"></i>
+                                        <span th:text="${#temporals.format(clip.expiresAt, 'dd/MM HH:mm', #locale)}"></span>
+                                    </small>
+                                </div>
+                                <div class="clip-preview" th:if="${clip.type.name() == 'TEXT'}" th:text="${clip.textContent}"></div>
+                                <div class="clip-preview" th:if="${clip.type.name() == 'FILE'}">
+                                    <i class="bi bi-file-earmark me-1"></i><span th:text="${clip.originalFileName}"></span>
+                                </div>
+                            </a>
+                            <form th:action="@{/c/{token}/delete(token=${clip.token})}" method="post" class="m-0">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                <button type="submit" class="btn btn-link text-danger p-0"
+                                        th:attr="onclick='return confirm(\'' + #{clip.delete.confirm} + '\')'"
+                                        title="Delete">
+                                    <i class="bi bi-trash" style="font-size:.85rem"></i>
+                                </button>
+                            </form>
                         </div>
-                        <div class="clip-preview" th:if="${clip.type.name() == 'TEXT'}" th:text="${clip.textContent}"></div>
-                        <div class="clip-preview" th:if="${clip.type.name() == 'FILE'}">
-                            <i class="bi bi-file-earmark me-1"></i><span th:text="${clip.originalFileName}"></span>
-                        </div>
-                    </a>
+                    </div>
                 </div>
             </div>
         </div>
