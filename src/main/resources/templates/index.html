@@ -79,14 +79,23 @@
                                     <i class="bi bi-file-earmark me-1"></i><span th:text="${clip.originalFileName}"></span>
                                 </div>
                             </a>
-                            <form th:action="@{/c/{token}/delete(token=${clip.token})}" method="post" class="m-0">
-                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                                <button type="submit" class="btn btn-link text-danger p-0"
-                                        th:attr="onclick='return confirm(\'' + #{clip.delete.confirm} + '\')'"
-                                        title="Delete">
-                                    <i class="bi bi-trash" style="font-size:.85rem"></i>
-                                </button>
-                            </form>
+                            <div class="d-flex flex-column gap-1">
+                                <form th:action="@{/c/{token}/renew(token=${clip.token})}" method="post" class="m-0">
+                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                    <button type="submit" class="btn btn-link text-success p-0"
+                                            th:title="#{clip.renew}">
+                                        <i class="bi bi-arrow-clockwise" style="font-size:.85rem"></i>
+                                    </button>
+                                </form>
+                                <form th:action="@{/c/{token}/delete(token=${clip.token})}" method="post" class="m-0">
+                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                    <button type="submit" class="btn btn-link text-danger p-0"
+                                            th:attr="onclick='return confirm(\'' + #{clip.delete.confirm} + '\')'"
+                                            title="Delete">
+                                        <i class="bi bi-trash" style="font-size:.85rem"></i>
+                                    </button>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>

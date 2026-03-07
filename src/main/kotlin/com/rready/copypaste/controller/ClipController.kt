@@ -97,6 +97,17 @@ class ClipController(
         return "clip"
     }
 
+    @PostMapping("/c/{token}/renew")
+    fun renewClip(
+        @PathVariable token: String,
+        @AuthenticationPrincipal principal: OAuth2User,
+        redirectAttributes: RedirectAttributes
+    ): String {
+        val email = principal.getAttribute<String>("email")!!
+        clipService.renewClip(token, email)
+        return "redirect:/"
+    }
+
     @PostMapping("/c/{token}/delete")
     fun deleteClip(
         @PathVariable token: String,
