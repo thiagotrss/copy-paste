@@ -14,7 +14,7 @@ class SecurityConfig {
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
         http
             .authorizeHttpRequests {
-                it.requestMatchers("/actuator/health", "/error").permitAll()
+                it.requestMatchers("/actuator/health", "/error", "/static/**").permitAll()
                     .anyRequest().authenticated()
             }
             .oauth2Login {
