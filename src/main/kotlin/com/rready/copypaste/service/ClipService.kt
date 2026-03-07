@@ -52,6 +52,9 @@ class ClipService(
         return clip
     }
 
+    fun getActiveClipsForUser(uploaderEmail: String): List<Clip> =
+        clipRepository.findByUploaderEmailAndExpiresAtAfterOrderByCreatedAtDesc(uploaderEmail, Instant.now())
+
     fun deleteExpired() {
         val expired = clipRepository.findByExpiresAtBefore(Instant.now())
         expired.forEach { clip ->
@@ -66,7 +69,7 @@ class ClipService(
     }
 
     private fun nextToken(): String {
-        val activeTokens = clipRepository.findAllTokens()
+        val activeTokens = clipRepository.findAll()
             .mapNotNull { it.token.toIntOrNull() }
             .toSet()
         var candidate = 1

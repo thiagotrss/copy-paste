@@ -12,12 +12,17 @@
         .card { border: none; box-shadow: 0 2px 12px rgba(0,0,0,.08); }
         .nav-pills .nav-link.active { background-color: #0d6efd; }
         textarea { resize: vertical; }
+        .clips-list { max-height: calc(100vh - 180px); overflow-y: auto; }
+        .clip-item { border-left: 3px solid transparent; transition: border-color .15s; }
+        .clip-item:hover { border-left-color: #0d6efd; }
+        .clip-item.file { border-left-color: #0dcaf0; }
+        .clip-preview { font-size: .8rem; color: #6c757d; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
     </style>
 </head>
 <body>
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container">
+    <div class="container-fluid px-4">
         <a class="navbar-brand" href="/"><i class="bi bi-clipboard2-fill me-2"></i>CopyPaste</a>
         <div class="ms-auto d-flex align-items-center gap-3">
             <span class="text-light small" th:text="${userEmail}"></span>
@@ -32,9 +37,48 @@
     </div>
 </nav>
 
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-7">
+<div class="container-fluid px-4 py-4">
+    <div class="row g-4">
+
+        <!-- Left: my clips -->
+        <div class="col-lg-3 col-md-4">
+            <div class="card h-100">
+                <div class="card-header bg-white fw-semibold">
+                    <i class="bi bi-collection me-2"></i><span th:text="#{index.my.clips}">My clips</span>
+                    <span class="badge bg-secondary ms-1" th:text="${myClips.size()}"></span>
+                </div>
+                <div class="clips-list">
+                    <div th:if="${myClips.isEmpty()}" class="text-center text-muted py-4 small">
+                        <i class="bi bi-inbox d-block mb-2" style="font-size:1.5rem"></i>
+                        <span th:text="#{index.no.clips}">No active clips yet</span>
+                    </div>
+                    <a th:each="clip : ${myClips}"
+                       th:href="@{/c/{token}(token=${clip.token})}"
+                       th:classappend="${clip.type.name() == 'FILE'} ? 'file' : ''"
+                       class="list-group-item list-group-item-action clip-item px-3 py-2">
+                        <div class="d-flex align-items-center justify-content-between mb-1">
+                            <span th:if="${clip.type.name() == 'TEXT'}" class="badge bg-secondary" style="font-size:.7rem">
+                                <i class="bi bi-type me-1"></i><span th:text="#{clip.badge.text}">Text</span>
+                            </span>
+                            <span th:if="${clip.type.name() == 'FILE'}" class="badge bg-info text-dark" style="font-size:.7rem">
+                                <i class="bi bi-file-earmark me-1"></i><span th:text="#{clip.badge.file}">File</span>
+                            </span>
+                            <small class="text-muted" style="font-size:.7rem">
+                                <i class="bi bi-clock me-1"></i>
+                                <span th:text="${#temporals.format(clip.expiresAt, 'dd/MM HH:mm', #locale)}"></span>
+                            </small>
+                        </div>
+                        <div class="clip-preview" th:if="${clip.type.name() == 'TEXT'}" th:text="${clip.textContent}"></div>
+                        <div class="clip-preview" th:if="${clip.type.name() == 'FILE'}">
+                            <i class="bi bi-file-earmark me-1"></i><span th:text="${clip.originalFileName}"></span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: create new clip -->
+        <div class="col-lg-9 col-md-8">
 
             <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
                 <span th:text="${error}"></span>
@@ -111,10 +155,11 @@
                 </div>
             </div>
 
-            <p class="text-center text-muted small mt-3">
+            <p class="text-muted small mt-3">
                 <i class="bi bi-clock me-1"></i><span th:text="#{index.expire.note}">Links expire automatically after 24 hours.</span>
             </p>
         </div>
+
     </div>
 </div>
 

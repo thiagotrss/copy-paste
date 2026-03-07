@@ -32,8 +32,10 @@ class ClipController(
         model: Model,
         @AuthenticationPrincipal principal: OAuth2User
     ): String {
-        model.addAttribute("userEmail", principal.getAttribute<String>("email"))
+        val email = principal.getAttribute<String>("email")!!
+        model.addAttribute("userEmail", email)
         model.addAttribute("userName", principal.getAttribute<String>("name"))
+        model.addAttribute("myClips", clipService.getActiveClipsForUser(email))
         return "index"
     }
 
