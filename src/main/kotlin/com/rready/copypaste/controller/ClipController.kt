@@ -4,6 +4,8 @@ import com.rready.copypaste.service.ClipService
 import com.rready.copypaste.service.FileStorageService
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import org.springframework.context.MessageSource
+import org.springframework.context.i18n.LocaleContextHolder
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.oauth2.core.user.OAuth2User
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -19,8 +21,11 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes
 @Controller
 class ClipController(
     private val clipService: ClipService,
-    private val fileStorageService: FileStorageService
+    private val fileStorageService: FileStorageService,
+    private val messageSource: MessageSource
 ) {
+
+    private fun msg(key: String) = messageSource.getMessage(key, null, LocaleContextHolder.getLocale())
 
     @GetMapping("/")
     fun home(
@@ -40,7 +45,7 @@ class ClipController(
         redirectAttributes: RedirectAttributes
     ): String {
         if (text.isBlank()) {
-            redirectAttributes.addFlashAttribute("error", "Text cannot be empty.")
+            redirectAttributes.addFlashAttribute("error", msg("index.error.textEmpty"))
             return "redirect:/"
         }
         val uploaderEmail = principal.getAttribute<String>("email")!!
@@ -57,7 +62,7 @@ class ClipController(
         redirectAttributes: RedirectAttributes
     ): String {
         if (file.isEmpty) {
-            redirectAttributes.addFlashAttribute("error", "Please select a file to upload.")
+            redirectAttributes.addFlashAttribute("error", msg("index.error.fileEmpty"))
             return "redirect:/"
         }
         val uploaderEmail = principal.getAttribute<String>("email")!!
@@ -77,10 +82,10 @@ class ClipController(
         val clip = try {
             clipService.getClipForViewer(token, viewerEmail)
         } catch (e: AccessDeniedException) {
-            model.addAttribute("error", "You don't have access to this clip.")
+            model.addAttribute("error", msg("clip.error.noAccess"))
             return "error"
         } ?: run {
-            model.addAttribute("error", "This clip doesn't exist or has expired.")
+            model.addAttribute("error", msg("clip.error.notFound"))
             return "error"
         }
 
