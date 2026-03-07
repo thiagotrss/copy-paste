@@ -2,6 +2,7 @@ package com.rready.copypaste.controller
 
 import com.rready.copypaste.service.ClipService
 import com.rready.copypaste.service.FileStorageService
+import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.oauth2.core.user.OAuth2User
@@ -69,7 +70,8 @@ class ClipController(
     fun viewClip(
         @PathVariable token: String,
         model: Model,
-        @AuthenticationPrincipal principal: OAuth2User
+        @AuthenticationPrincipal principal: OAuth2User,
+        request: HttpServletRequest
     ): String {
         val viewerEmail = principal.getAttribute<String>("email")!!
         val clip = try {
@@ -84,6 +86,7 @@ class ClipController(
 
         model.addAttribute("clip", clip)
         model.addAttribute("userEmail", viewerEmail)
+        model.addAttribute("shareUrl", request.requestURL.toString())
         return "clip"
     }
 
