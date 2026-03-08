@@ -55,6 +55,14 @@ class ClipService(
     fun getActiveClipsForUser(uploaderEmail: String): List<Clip> =
         clipRepository.findByUploaderEmailAndExpiresAtAfterOrderByCreatedAtDesc(uploaderEmail, Instant.now())
 
+    fun renewClip(token: String, requesterEmail: String): Boolean {
+        val clip = clipRepository.findByToken(token) ?: return false
+        if (clip.uploaderEmail.lowercase() != requesterEmail.lowercase()) return false
+        val newExpiry = clip.expiresAt.plusSeconds(ttlHours * 3600)
+        clipRepository.save(clip.copy(expiresAt = newExpiry))
+        return true
+    }
+
     fun deleteClip(token: String, requesterEmail: String): Boolean {
         val clip = clipRepository.findByToken(token) ?: return false
         if (clip.uploaderEmail.lowercase() != requesterEmail.lowercase()) return false
