@@ -61,7 +61,7 @@
                     <div th:each="clip : ${myClips}"
                          th:classappend="${clip.type.name() == 'FILE'} ? 'file' : ''"
                          class="list-group-item clip-item px-3 py-2">
-                        <div class="d-flex align-items-start gap-2">
+                        <div class="d-flex align-items-start gap-2" style="border-bottom: 1px inset">
                             <div class="d-flex flex-column gap-1 flex-shrink-0">
                                 <form th:action="@{/c/{token}/renew(token=${clip.token})}" method="post" class="m-0">
                                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
