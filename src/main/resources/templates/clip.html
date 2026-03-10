@@ -81,6 +81,9 @@
                         <button class="btn btn-sm btn-outline-secondary mt-2" onclick="copyText()">
                             <i class="bi bi-clipboard me-1"></i><span th:text="#{clip.copy.text}">Copy text</span>
                         </button>
+                        <div id="copyTextFeedback" class="text-success small mt-1" style="display:none">
+                            <i class="bi bi-check2"></i> <span th:text="#{clip.copied}">Copied!</span>
+                        </div>
                         <textarea id="textContent" th:text="${clip.textContent}" style="display:none"></textarea>
                     </div>
 
@@ -140,7 +143,11 @@ function copyLink() {
 }
 function copyText() {
     const text = document.getElementById('textContent').value;
-    navigator.clipboard.writeText(text);
+    navigator.clipboard.writeText(text).then(() => {
+        const fb = document.getElementById('copyTextFeedback');
+        fb.style.display = 'block';
+        setTimeout(() => fb.style.display = 'none', 2000);
+    });
 }
 </script>
 </body>
