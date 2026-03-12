@@ -18,7 +18,7 @@ class SecurityConfig {
                     .anyRequest().authenticated()
             }
             .oauth2Login {
-                it.defaultSuccessUrl("/", true)
+                it.defaultSuccessUrl("/", false)
             }
             .logout {
                 it.logoutUrl("/logout")
