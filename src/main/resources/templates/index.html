@@ -23,9 +23,26 @@
         .clip-item.file { border-left-color: #0dcaf0; }
         .clip-preview { font-size: .8rem; color: #6c757d; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .min-w-0 { min-width: 0; }
+        #loading-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(255,255,255,.85);
+            z-index: 9999;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+        #loading-overlay.active { display: flex; }
     </style>
 </head>
 <body>
+
+<div id="loading-overlay">
+    <div class="spinner-border text-primary" style="width:3rem;height:3rem;" role="status"></div>
+    <span class="fw-semibold text-secondary" th:text="#{index.generating}">Generating link…</span>
+</div>
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container-fluid px-4">
@@ -190,5 +207,12 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.querySelectorAll('form[action*="/clip/text"], form[action*="/clip/file"]').forEach(function(form) {
+        form.addEventListener('submit', function() {
+            document.getElementById('loading-overlay').classList.add('active');
+        });
+    });
+</script>
 </body>
 </html>
