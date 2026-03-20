@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${#locale.language}">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title th:text="#{prefs.page.title}">CopyPaste — Preferences</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+    <style>
+        body { background: #f8f9fa; }
+        .navbar-brand { font-weight: 700; letter-spacing: -0.5px; }
+        .card { border: none; box-shadow: 0 2px 12px rgba(0,0,0,.08); }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid px-4">
+        <a class="navbar-brand" href="/"><i class="bi bi-clipboard2-fill me-2"></i>CopyPaste</a>
+        <div class="ms-auto d-flex align-items-center gap-3">
+            <span class="text-light small" th:text="${userEmail}"></span>
+            <div class="d-flex gap-1">
+                <a href="?lang=en" class="btn btn-outline-light btn-sm">EN</a>
+                <a href="?lang=pt" class="btn btn-outline-light btn-sm">PT</a>
+            </div>
+            <form th:action="@{/logout}" method="post" class="m-0">
+                <button type="submit" class="btn btn-outline-light btn-sm" th:text="#{nav.logout}">Logout</button>
+            </form>
+        </div>
+    </div>
+</nav>
+
+<div class="container py-5" style="max-width: 540px;">
+    <div class="card">
+        <div class="card-body p-4">
+            <h5 class="card-title mb-4">
+                <i class="bi bi-gear me-2"></i><span th:text="#{prefs.title}">Preferences</span>
+            </h5>
+
+            <form th:action="@{/preferences}" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+                <div class="mb-4">
+                    <h6 class="text-muted fw-semibold text-uppercase small mb-3" th:text="#{prefs.section.clips}">Clips</h6>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch"
+                               id="alwaysPrivate" name="alwaysPrivate"
+                               th:checked="${prefs.alwaysPrivate}"/>
+                        <label class="form-check-label" for="alwaysPrivate">
+                            <span th:text="#{prefs.always.private.label}">Always private</span>
+                            <div class="text-muted small" th:text="#{prefs.always.private.hint}">
+                                Pre-fill the email restriction field with your own email when creating a clip.
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-lg me-1"></i><span th:text="#{prefs.save}">Save</span>
+                    </button>
+                    <a href="/" class="btn btn-outline-secondary" th:text="#{prefs.cancel}">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

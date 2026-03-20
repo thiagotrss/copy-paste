@@ -53,6 +53,9 @@
                 <a href="?lang=en" class="btn btn-outline-light btn-sm">EN</a>
                 <a href="?lang=pt" class="btn btn-outline-light btn-sm">PT</a>
             </div>
+            <a href="/preferences" class="btn btn-outline-light btn-sm" th:title="#{nav.preferences}">
+                <i class="bi bi-gear"></i>
+            </a>
             <form th:action="@{/logout}" method="post" class="m-0">
                 <button type="submit" class="btn btn-outline-light btn-sm" th:text="#{nav.logout}">Logout</button>
             </form>
@@ -161,7 +164,8 @@
                                         <span class="text-muted" th:text="'(' + #{index.restrict.hint} + ')'"></span>
                                     </label>
                                     <input type="text" name="allowedEmails" class="form-control"
-                                           th:placeholder="#{index.emails.placeholder}"/>
+                                           th:placeholder="#{index.emails.placeholder}"
+                                           th:value="${prefs.alwaysPrivate} ? ${userEmail} : ''"/>
                                 </div>
                                 <button type="submit" class="btn btn-primary w-100">
                                     <i class="bi bi-link-45deg me-1"></i><span th:text="#{index.generate.link}">Generate link</span>
@@ -186,7 +190,8 @@
                                         <span class="text-muted" th:text="'(' + #{index.restrict.hint} + ')'"></span>
                                     </label>
                                     <input type="text" name="allowedEmails" class="form-control"
-                                           th:placeholder="#{index.emails.placeholder}"/>
+                                           th:placeholder="#{index.emails.placeholder}"
+                                           th:value="${prefs.alwaysPrivate} ? ${userEmail} : ''"/>
                                 </div>
                                 <button type="submit" class="btn btn-primary w-100">
                                     <i class="bi bi-link-45deg me-1"></i><span th:text="#{index.generate.link}">Generate link</span>

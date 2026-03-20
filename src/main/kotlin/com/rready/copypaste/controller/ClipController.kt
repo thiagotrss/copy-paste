@@ -2,6 +2,7 @@ package com.rready.copypaste.controller
 
 import com.rready.copypaste.service.ClipService
 import com.rready.copypaste.service.FileStorageService
+import com.rready.copypaste.service.UserPreferencesService
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.context.MessageSource
@@ -22,6 +23,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes
 class ClipController(
     private val clipService: ClipService,
     private val fileStorageService: FileStorageService,
+    private val userPreferencesService: UserPreferencesService,
     private val messageSource: MessageSource
 ) {
 
@@ -36,6 +38,7 @@ class ClipController(
         model.addAttribute("userEmail", email)
         model.addAttribute("userName", principal.getAttribute<String>("name"))
         model.addAttribute("myClips", clipService.getActiveClipsForUser(email))
+        model.addAttribute("prefs", userPreferencesService.getPreferences(email))
         return "index"
     }
 
