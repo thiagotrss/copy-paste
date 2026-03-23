@@ -7,4 +7,5 @@ uploads/
 *.iml
 .DS_Store
 *.env
+bin/
 gradle.properties
