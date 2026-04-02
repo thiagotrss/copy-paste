@@ -10,5 +10,6 @@ data class UserPreferences(
     val id: String? = null,
     @Indexed(unique = true)
     val email: String,
-    val alwaysPrivate: Boolean = false
+    val alwaysPrivate: Boolean = false,
+    val preferredLanguage: String = "en"
 )

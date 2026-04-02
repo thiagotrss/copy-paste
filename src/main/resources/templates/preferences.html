@@ -41,6 +41,14 @@
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
 
                 <div class="mb-4">
+                    <h6 class="text-muted fw-semibold text-uppercase small mb-3" th:text="#{prefs.section.language}">Language</h6>
+                    <select class="form-select" name="preferredLanguage">
+                        <option value="en" th:selected="${prefs.preferredLanguage == 'en'}" th:text="#{prefs.language.en}">English</option>
+                        <option value="pt" th:selected="${prefs.preferredLanguage == 'pt'}" th:text="#{prefs.language.pt}">Português</option>
+                    </select>
+                </div>
+
+                <div class="mb-4">
                     <h6 class="text-muted fw-semibold text-uppercase small mb-3" th:text="#{prefs.section.clips}">Clips</h6>
                     <div class="form-check form-switch">
                         <input class="form-check-input" type="checkbox" role="switch"
