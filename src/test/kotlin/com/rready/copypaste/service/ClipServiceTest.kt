@@ -173,27 +173,85 @@ class ClipServiceTest {
 
         val result = clipService.getClipForViewer("1", "owner@example.com")
 
-        assertEquals(clip, result)
+        assertEquals(clip.token, result?.token)
+    }
+
+    @Test
+    fun `getClipForViewer does not increment accessCount when viewer is the uploader`() {
+        val clip = clip(uploaderEmail = "owner@example.com").copy(accessCount = 7)
+        every { clipRepository.findByToken("1") } returns clip
+
+        val result = clipService.getClipForViewer("1", "owner@example.com")
+
+        assertEquals(7L, result?.accessCount)
+        verify(exactly = 0) { clipRepository.save(any<Clip>()) }
+    }
+
+    @Test
+    fun `getClipForViewer uploader skip is case-insensitive`() {
+        val clip = clip(uploaderEmail = "Owner@Example.com").copy(accessCount = 3)
+        every { clipRepository.findByToken("1") } returns clip
+
+        val result = clipService.getClipForViewer("1", "OWNER@EXAMPLE.COM")
+
+        assertEquals(3L, result?.accessCount)
+        verify(exactly = 0) { clipRepository.save(any<Clip>()) }
+    }
+
+    @Test
+    fun `getClipForViewer increments accessCount and persists the updated clip`() {
+        val clip = clip(uploaderEmail = "owner@example.com").copy(accessCount = 4)
+        every { clipRepository.findByToken("1") } returns clip
+        val saved = slot<Clip>()
+        every { clipRepository.save(capture(saved)) } answers { firstArg() }
+
+        val result = clipService.getClipForViewer("1", "anyone@example.com")
+
+        assertEquals(5L, saved.captured.accessCount)
+        assertEquals(5L, result?.accessCount)
+    }
+
+    @Test
+    fun `getClipForViewer does not increment accessCount when access is denied`() {
+        val clip = clip(uploaderEmail = "owner@example.com", allowedEmails = listOf("allowed@example.com"))
+        every { clipRepository.findByToken("1") } returns clip
+
+        assertThrows(AccessDeniedException::class.java) {
+            clipService.getClipForViewer("1", "stranger@example.com")
+        }
+        verify(exactly = 0) { clipRepository.save(any<Clip>()) }
+    }
+
+    @Test
+    fun `getClipForViewer does not increment accessCount when clip is expired`() {
+        val expired = clip(expiresAt = Instant.now().minusSeconds(1))
+        every { clipRepository.findByToken("1") } returns expired
+
+        clipService.getClipForViewer("1", "user@example.com")
+
+        verify(exactly = 0) { clipRepository.save(any<Clip>()) }
     }
 
     @Test
     fun `getClipForViewer allows any viewer when allowedEmails is null`() {
         val clip = clip(uploaderEmail = "owner@example.com", allowedEmails = null)
         every { clipRepository.findByToken("1") } returns clip
+        every { clipRepository.save(any<Clip>()) } answers { firstArg() }
 
         val result = clipService.getClipForViewer("1", "anyone@example.com")
 
-        assertEquals(clip, result)
+        assertEquals(clip.token, result?.token)
     }
 
     @Test
     fun `getClipForViewer returns clip for email listed in allowedEmails`() {
         val clip = clip(uploaderEmail = "owner@example.com", allowedEmails = listOf("guest@example.com"))
         every { clipRepository.findByToken("1") } returns clip
+        every { clipRepository.save(any<Clip>()) } answers { firstArg() }
 
         val result = clipService.getClipForViewer("1", "guest@example.com")
 
-        assertEquals(clip, result)
+        assertEquals(clip.token, result?.token)
     }
 
     @Test
