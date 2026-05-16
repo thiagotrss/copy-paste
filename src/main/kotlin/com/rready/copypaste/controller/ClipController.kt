@@ -4,9 +4,13 @@ import com.rready.copypaste.service.ClipService
 import com.rready.copypaste.service.FileStorageService
 import com.rready.copypaste.service.UserPreferencesService
 import jakarta.servlet.http.HttpServletRequest
-import jakarta.servlet.http.HttpServletResponse
 import org.springframework.context.MessageSource
 import org.springframework.context.i18n.LocaleContextHolder
+import org.springframework.core.io.support.ResourceRegion
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.oauth2.core.user.OAuth2User
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -15,6 +19,7 @@ import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
@@ -133,25 +138,40 @@ class ClipController(
     fun downloadFile(
         @PathVariable token: String,
         @AuthenticationPrincipal principal: OAuth2User,
-        response: HttpServletResponse
-    ) {
+        @RequestHeader headers: HttpHeaders
+    ): ResponseEntity<ResourceRegion> {
         val viewerEmail = principal.getAttribute<String>("email")!!
         val clip = try {
             clipService.getClipForViewer(token, viewerEmail)
         } catch (e: AccessDeniedException) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN)
-            return
-        } ?: run {
-            response.sendError(HttpServletResponse.SC_NOT_FOUND)
-            return
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+        } ?: return ResponseEntity.status(HttpStatus.NOT_FOUND).build()
+
+        val storagePath = clip.storagePath
+            ?: return ResponseEntity.status(HttpStatus.NOT_FOUND).build()
+
+        val resource = fileStorageService.resource(storagePath)
+        val contentLength = resource.contentLength()
+        val ranges = headers.range
+
+        val (region, status) = if (ranges.isNotEmpty()) {
+            val range = ranges[0]
+            val start = range.getRangeStart(contentLength)
+            val end = range.getRangeEnd(contentLength)
+            ResourceRegion(resource, start, end - start + 1) to HttpStatus.PARTIAL_CONTENT
+        } else {
+            ResourceRegion(resource, 0, contentLength) to HttpStatus.OK
         }
 
-        if (clip.storagePath == null) {
-            response.sendError(HttpServletResponse.SC_NOT_FOUND)
-            return
-        }
+        val mediaType = clip.contentType
+            ?.let { runCatching { MediaType.parseMediaType(it) }.getOrNull() }
+            ?: MediaType.APPLICATION_OCTET_STREAM
 
-        fileStorageService.stream(clip.storagePath, clip.contentType, clip.originalFileName, response)
+        return ResponseEntity.status(status)
+            .contentType(mediaType)
+            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"${clip.originalFileName ?: "file"}\"")
+            .header(HttpHeaders.ACCEPT_RANGES, "bytes")
+            .body(region)
     }
 
     private fun parseEmails(raw: String?): List<String>? {

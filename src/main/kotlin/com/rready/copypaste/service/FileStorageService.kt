@@ -1,7 +1,8 @@
 package com.rready.copypaste.service
 
-import jakarta.servlet.http.HttpServletResponse
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.core.io.FileSystemResource
+import org.springframework.core.io.Resource
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import java.nio.file.Files
@@ -24,10 +25,5 @@ class FileStorageService(
         Files.deleteIfExists(Path.of(storagePath))
     }
 
-    fun stream(storagePath: String, contentType: String?, fileName: String?, response: HttpServletResponse) {
-        response.contentType = contentType ?: "application/octet-stream"
-        response.setHeader("Content-Disposition", "attachment; filename=\"${fileName ?: "file"}\"")
-        response.setContentLengthLong(Files.size(Path.of(storagePath)))
-        Files.copy(Path.of(storagePath), response.outputStream)
-    }
+    fun resource(storagePath: String): Resource = FileSystemResource(Path.of(storagePath))
 }
