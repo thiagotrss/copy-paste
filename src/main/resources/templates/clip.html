@@ -124,14 +124,22 @@
                 <a href="/" class="btn btn-outline-secondary btn-sm">
                     <i class="bi bi-plus-circle me-1"></i><span th:text="#{clip.create.new}">Create new clip</span>
                 </a>
-                <form th:if="${userEmail == clip.uploaderEmail}"
-                      th:action="@{/c/{token}/delete(token=${clip.token})}" method="post" class="m-0">
-                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                    <button type="submit" class="btn btn-outline-danger btn-sm"
-                            th:attr="onclick='return confirm(\'' + #{clip.delete.confirm} + '\')'"  >
-                        <i class="bi bi-trash me-1"></i><span th:text="#{clip.delete}">Delete</span>
-                    </button>
-                </form>
+                <div th:if="${userEmail == clip.uploaderEmail}" class="d-flex gap-2">
+                    <form th:action="@{/c/{token}/renew(token=${clip.token})}" method="post" class="m-0">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        <input type="hidden" name="next" th:value="@{/c/{token}(token=${clip.token})}"/>
+                        <button type="submit" class="btn btn-outline-success btn-sm">
+                            <i class="bi bi-arrow-clockwise me-1"></i><span th:text="#{clip.renew}">Renew for 24 hours</span>
+                        </button>
+                    </form>
+                    <form th:action="@{/c/{token}/delete(token=${clip.token})}" method="post" class="m-0">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        <button type="submit" class="btn btn-outline-danger btn-sm"
+                                th:attr="onclick='return confirm(\'' + #{clip.delete.confirm} + '\')'"  >
+                            <i class="bi bi-trash me-1"></i><span th:text="#{clip.delete}">Delete</span>
+                        </button>
+                    </form>
+                </div>
             </div>
 
         </div>
