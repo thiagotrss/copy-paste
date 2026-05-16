@@ -31,7 +31,9 @@ data class Clip(
     val createdAt: Instant? = null,
 
     @Indexed
-    val expiresAt: Instant
+    val expiresAt: Instant,
+
+    val accessCount: Long = 0
 )
 
 enum class ClipType { TEXT, FILE }

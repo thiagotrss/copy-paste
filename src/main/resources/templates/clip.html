@@ -53,10 +53,16 @@
                                 <strong th:text="${clip.uploaderEmail}"></strong>
                             </small>
                         </div>
-                        <small class="text-muted">
-                            <i class="bi bi-clock me-1"></i>
-                            <span th:text="#{clip.expires}">expires</span>
-                            <span th:text="${#temporals.format(clip.expiresAt, 'dd MMM HH:mm', #locale)}"></span>
+                        <small class="text-muted text-end">
+                            <div>
+                                <i class="bi bi-clock me-1"></i>
+                                <span th:text="#{clip.expires}">expires</span>
+                                <span th:text="${#temporals.format(clip.expiresAt, 'dd MMM HH:mm', #locale)}"></span>
+                            </div>
+                            <div>
+                                <i class="bi bi-eye me-1"></i>
+                                <span th:text="#{clip.access.count(${clip.accessCount})}">accessed 0 time(s)</span>
+                            </div>
                         </small>
                     </div>
 
