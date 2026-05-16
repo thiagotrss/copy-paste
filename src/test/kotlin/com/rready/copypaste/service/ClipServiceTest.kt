@@ -170,11 +170,32 @@ class ClipServiceTest {
     fun `getClipForViewer returns clip for the uploader`() {
         val clip = clip(uploaderEmail = "owner@example.com")
         every { clipRepository.findByToken("1") } returns clip
-        every { clipRepository.save(any<Clip>()) } answers { firstArg() }
 
         val result = clipService.getClipForViewer("1", "owner@example.com")
 
         assertEquals(clip.token, result?.token)
+    }
+
+    @Test
+    fun `getClipForViewer does not increment accessCount when viewer is the uploader`() {
+        val clip = clip(uploaderEmail = "owner@example.com").copy(accessCount = 7)
+        every { clipRepository.findByToken("1") } returns clip
+
+        val result = clipService.getClipForViewer("1", "owner@example.com")
+
+        assertEquals(7L, result?.accessCount)
+        verify(exactly = 0) { clipRepository.save(any<Clip>()) }
+    }
+
+    @Test
+    fun `getClipForViewer uploader skip is case-insensitive`() {
+        val clip = clip(uploaderEmail = "Owner@Example.com").copy(accessCount = 3)
+        every { clipRepository.findByToken("1") } returns clip
+
+        val result = clipService.getClipForViewer("1", "OWNER@EXAMPLE.COM")
+
+        assertEquals(3L, result?.accessCount)
+        verify(exactly = 0) { clipRepository.save(any<Clip>()) }
     }
 
     @Test
@@ -266,7 +287,6 @@ class ClipServiceTest {
     fun `getClipForViewer uploader check is case-insensitive`() {
         val clip = clip(uploaderEmail = "Owner@Example.com", allowedEmails = listOf("other@example.com"))
         every { clipRepository.findByToken("1") } returns clip
-        every { clipRepository.save(any<Clip>()) } answers { firstArg() }
 
         val result = clipService.getClipForViewer("1", "OWNER@EXAMPLE.COM")
 

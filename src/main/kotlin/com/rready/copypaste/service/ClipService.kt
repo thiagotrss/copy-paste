@@ -49,6 +49,7 @@ class ClipService(
         val clip = clipRepository.findByToken(token) ?: return null
         if (clip.expiresAt.isBefore(Instant.now())) return null
         if (!isAllowed(clip, viewerEmail)) throw AccessDeniedException("You don't have access to this clip.")
+        if (viewerEmail.lowercase() == clip.uploaderEmail.lowercase()) return clip
         return clipRepository.save(clip.copy(accessCount = clip.accessCount + 1))
     }
 
