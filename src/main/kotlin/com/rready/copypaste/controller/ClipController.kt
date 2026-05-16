@@ -103,12 +103,19 @@ class ClipController(
     @PostMapping("/c/{token}/renew")
     fun renewClip(
         @PathVariable token: String,
+        @RequestParam(required = false) next: String?,
         @AuthenticationPrincipal principal: OAuth2User,
         redirectAttributes: RedirectAttributes
     ): String {
         val email = principal.getAttribute<String>("email")!!
         clipService.renewClip(token, email)
-        return "redirect:/"
+        return "redirect:" + safeNext(next, default = "/")
+    }
+
+    private fun safeNext(next: String?, default: String): String {
+        if (next.isNullOrBlank()) return default
+        if (!next.startsWith("/") || next.startsWith("//") || next.contains("://")) return default
+        return next
     }
 
     @PostMapping("/c/{token}/delete")
